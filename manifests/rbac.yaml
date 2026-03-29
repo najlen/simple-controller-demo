@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: message-controller
+  namespace: demo
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: message-controller
+rules:
+  # Watch and patch Message CRs (and their status)
+  - apiGroups: [demo.example.com]
+    resources: [messages, messages/status]
+    verbs: [get, list, watch, patch, update]
+  # kopf coordination: events
+  - apiGroups: [""]
+    resources: [events]
+    verbs: [create, patch, get, list, watch]
+  # kopf coordination: configmaps (progress/locks)
+  - apiGroups: [""]
+    resources: [configmaps]
+    verbs: [get, list, watch, create, update, patch, delete]
+  # kopf coordination: leases
+  - apiGroups: [coordination.k8s.io]
+    resources: [leases]
+    verbs: [get, list, watch, create, update, patch, delete]
+  # kopf needs to watch namespaces
+  - apiGroups: [""]
+    resources: [namespaces]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: message-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: message-controller
+subjects:
+  - kind: ServiceAccount
+    name: message-controller
+    namespace: demo

@@ -1,0 +1,67 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: messages.demo.example.com
+spec:
+  group: demo.example.com
+  names:
+    kind: Message
+    listKind: MessageList
+    plural: messages
+    singular: message
+    shortNames:
+      - msg
+  scope: Namespaced
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: Author
+          type: string
+          jsonPath: .spec.author
+        - name: Board
+          type: string
+          jsonPath: .spec.board
+        - name: Phase
+          type: string
+          jsonPath: .status.phase
+        - name: MessageID
+          type: string
+          jsonPath: .status.messageId
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required: [author, title, body]
+              properties:
+                author:
+                  type: string
+                title:
+                  type: string
+                body:
+                  type: string
+                board:
+                  type: string
+                  default: general
+            status:
+              type: object
+              properties:
+                phase:
+                  type: string
+                  enum: [Pending, Posted, Updated, Deleted, Error]
+                messageId:
+                  type: string
+                boardUrl:
+                  type: string
+                lastSyncTime:
+                  type: string
+                error:
+                  type: string

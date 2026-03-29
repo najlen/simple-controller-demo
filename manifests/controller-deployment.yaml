@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: message-controller
+  namespace: demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: message-controller
+  template:
+    metadata:
+      labels:
+        app: message-controller
+    spec:
+      serviceAccountName: message-controller
+      containers:
+        - name: controller
+          image: message-controller:latest
+          imagePullPolicy: Never
+          env:
+            - name: MESSAGE_BOARD_URL
+              value: "http://message-board-api:8080"
+          ports:
+            - containerPort: 8080
+              name: healthz
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: healthz
+            initialDelaySeconds: 10
+            periodSeconds: 30

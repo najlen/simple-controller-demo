@@ -1,0 +1,10 @@
+apiVersion: demo.example.com/v1
+kind: Message
+metadata:
+  name: hello-world
+  namespace: demo
+spec:
+  author: Alice
+  title: Hello, World! (edited)
+  body: This message was updated via a Kubernetes controller — the controller called the external API.
+  board: general
