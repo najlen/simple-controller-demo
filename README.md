@@ -5,14 +5,14 @@ A minimal demo showing how Kubernetes can act as a **control plane for external 
 A custom `Message` resource is defined via a CRD. A [kopf](https://kopf.readthedocs.io/) controller watches for create/update/delete events and calls an external FastAPI message board running **outside** the cluster — demonstrating the pattern without any cloud dependencies.
 
 ```
-┌─────────────────────────────────────┐      HTTP      ┌──────────────────────┐
+┌─────────────────────────────────────┐      HTTP       ┌───────────────────────┐
 │          kind cluster               │  ────────────▶  │  FastAPI message      │
 │                                     │                 │  board (Docker)       │
 │  kubectl apply message-hello.yaml   │                 │                       │
 │          │                          │                 │  POST /boards/general │
 │          ▼                          │                 │  PUT  /boards/…/…     │
 │   Message CR  ──▶  kopf controller  │                 │  DELETE /boards/…/…   │
-└─────────────────────────────────────┘                 └──────────────────────┘
+└─────────────────────────────────────┘                 └───────────────────────┘
 ```
 
 ---

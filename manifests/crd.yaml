@@ -1,16 +1,16 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: messages.demo.example.com
+  name: primeclaims.demo.example.com
 spec:
   group: demo.example.com
   names:
-    kind: Message
-    listKind: MessageList
-    plural: messages
-    singular: message
+    kind: PrimeClaim
+    listKind: PrimeClaimList
+    plural: primeclaims
+    singular: primeclaim
     shortNames:
-      - msg
+      - pc
   scope: Namespaced
   versions:
     - name: v1
@@ -19,18 +19,15 @@ spec:
       subresources:
         status: {}
       additionalPrinterColumns:
-        - name: Author
+        - name: Requester
           type: string
-          jsonPath: .spec.author
-        - name: Board
-          type: string
-          jsonPath: .spec.board
+          jsonPath: .spec.requester
         - name: Phase
           type: string
           jsonPath: .status.phase
-        - name: MessageID
-          type: string
-          jsonPath: .status.messageId
+        - name: Prime
+          type: integer
+          jsonPath: .status.prime
         - name: Age
           type: date
           jsonPath: .metadata.creationTimestamp
@@ -40,27 +37,20 @@ spec:
           properties:
             spec:
               type: object
-              required: [author, title, body]
+              required: [requester]
               properties:
-                author:
+                requester:
                   type: string
-                title:
-                  type: string
-                body:
-                  type: string
-                board:
-                  type: string
-                  default: general
+                  description: Name of the team or service claiming the prime.
             status:
               type: object
               properties:
                 phase:
                   type: string
-                  enum: [Pending, Posted, Updated, Deleted, Error]
-                messageId:
-                  type: string
-                boardUrl:
-                  type: string
+                  enum: [Pending, Allocated, Error]
+                prime:
+                  type: integer
+                  description: The allocated prime number.
                 lastSyncTime:
                   type: string
                 error:

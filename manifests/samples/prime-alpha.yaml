@@ -1,0 +1,7 @@
+apiVersion: demo.example.com/v1
+kind: PrimeClaim
+metadata:
+  name: claim-alpha
+  namespace: demo
+spec:
+  requester: team-alpha

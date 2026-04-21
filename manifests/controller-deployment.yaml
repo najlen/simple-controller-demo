@@ -1,26 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: message-controller
+  name: prime-controller
   namespace: demo
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: message-controller
+      app: prime-controller
   template:
     metadata:
       labels:
-        app: message-controller
+        app: prime-controller
     spec:
-      serviceAccountName: message-controller
+      serviceAccountName: prime-controller
       containers:
         - name: controller
-          image: message-controller:latest
+          image: prime-controller:latest
           imagePullPolicy: Never
           env:
-            - name: MESSAGE_BOARD_URL
-              value: "http://message-board-api:8080"
+            - name: PRIME_API_URL
+              value: "http://prime-api:8080"
           ports:
             - containerPort: 8080
               name: healthz

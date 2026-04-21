@@ -1,12 +1,12 @@
 .PHONY: prereqs build setup load deploy demo teardown logs status
 
-KIND_VERSION   := v0.24.0
+KIND_VERSION    := v0.24.0
 KUBECTL_VERSION := v1.31.0
-KIND_BIN       := /usr/local/bin/kind
-KUBECTL_BIN    := /usr/local/bin/kubectl
-CLUSTER_NAME   := demo-cluster
-NETWORK_NAME   := demo-net
-API_CONTAINER  := message-board-api
+KIND_BIN        := /usr/local/bin/kind
+KUBECTL_BIN     := /usr/local/bin/kubectl
+CLUSTER_NAME    := demo-cluster
+NETWORK_NAME    := demo-net
+API_CONTAINER   := prime-api
 
 # ──────────────────────────────────────────────────────────────────────────────
 # prereqs: download kind and kubectl if not already installed
@@ -34,10 +34,10 @@ prereqs:
 # build: build both Docker images
 # ──────────────────────────────────────────────────────────────────────────────
 build:
-	@echo "==> Building external-api image..."
-	docker build -t message-board-api:latest ./external-api
-	@echo "==> Building controller image..."
-	docker build -t message-controller:latest ./controller
+	@echo "==> Building prime-api image..."
+	docker build -t prime-api:latest ./external-api
+	@echo "==> Building prime-controller image..."
+	docker build -t prime-controller:latest ./controller
 
 # ──────────────────────────────────────────────────────────────────────────────
 # setup: create network, start external API, create kind cluster, connect net
@@ -47,7 +47,7 @@ setup:
 	@docker network inspect $(NETWORK_NAME) &>/dev/null || \
 	  docker network create $(NETWORK_NAME)
 
-	@echo "==> Starting external API container..."
+	@echo "==> Starting prime-api container..."
 	@if docker ps -a --format '{{.Names}}' | grep -q '^$(API_CONTAINER)$$'; then \
 	  echo "  Container '$(API_CONTAINER)' already exists — removing..."; \
 	  docker rm -f $(API_CONTAINER); \
@@ -56,11 +56,11 @@ setup:
 	  --name $(API_CONTAINER) \
 	  --network $(NETWORK_NAME) \
 	  -p 8080:8080 \
-	  message-board-api:latest
+	  prime-api:latest
 	@echo "  Waiting for API to be ready..."
 	@for i in $$(seq 1 20); do \
 	  if curl -sf http://localhost:8080/ &>/dev/null; then \
-	    echo "  External API is up."; break; \
+	    echo "  Prime API is up."; break; \
 	  fi; sleep 1; done
 
 	@echo "==> Creating kind cluster '$(CLUSTER_NAME)'..."
@@ -80,8 +80,8 @@ setup:
 # load: load controller image into kind cluster
 # ──────────────────────────────────────────────────────────────────────────────
 load:
-	@echo "==> Loading controller image into kind..."
-	kind load docker-image message-controller:latest --name $(CLUSTER_NAME)
+	@echo "==> Loading prime-controller image into kind..."
+	kind load docker-image prime-controller:latest --name $(CLUSTER_NAME)
 
 # ──────────────────────────────────────────────────────────────────────────────
 # deploy: apply manifests and wait for rollout
@@ -91,11 +91,11 @@ deploy:
 	kubectl apply -f manifests/namespace.yaml
 	kubectl apply -f manifests/crd.yaml
 	@echo "  Waiting for CRD to be established..."
-	kubectl wait --for=condition=Established crd/messages.demo.example.com --timeout=60s
+	kubectl wait --for=condition=Established crd/primeclaims.demo.example.com --timeout=60s
 	kubectl apply -f manifests/rbac.yaml
 	kubectl apply -f manifests/controller-deployment.yaml
 	@echo "  Waiting for controller rollout..."
-	kubectl rollout status deployment/message-controller -n demo --timeout=120s
+	kubectl rollout status deployment/prime-controller -n demo --timeout=120s
 	@echo "==> Deploy complete."
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -108,13 +108,13 @@ demo:
 # logs: tail controller logs
 # ──────────────────────────────────────────────────────────────────────────────
 logs:
-	kubectl logs -n demo -l app=message-controller -f
+	kubectl logs -n demo -l app=prime-controller -f
 
 # ──────────────────────────────────────────────────────────────────────────────
-# status: show all messages
+# status: show all prime claims
 # ──────────────────────────────────────────────────────────────────────────────
 status:
-	kubectl get messages -n demo
+	kubectl get primeclaims -n demo
 
 # ──────────────────────────────────────────────────────────────────────────────
 # teardown: clean up everything
@@ -122,7 +122,7 @@ status:
 teardown:
 	@echo "==> Deleting kind cluster..."
 	kind delete cluster --name $(CLUSTER_NAME) || true
-	@echo "==> Stopping API container..."
+	@echo "==> Stopping prime-api container..."
 	docker rm -f $(API_CONTAINER) || true
 	@echo "==> Removing network..."
 	docker network rm $(NETWORK_NAME) || true
