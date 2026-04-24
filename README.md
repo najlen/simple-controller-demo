@@ -57,6 +57,8 @@ You can still override Kind directly with `KIND_PROVIDER=podman` if needed. If y
 - https://kind.sigs.k8s.io/docs/user/quick-start/
 - https://kind.sigs.k8s.io/docs/user/rootless/
 
+For image loading, the Podman path uses `podman save` plus `kind load image-archive`. Kind documents `image-archive` as a supported load mechanism, and Podman documents `save` producing a `docker-archive`, which avoids local image lookup issues with the experimental Podman provider.
+
 ---
 
 ## Project layout
@@ -154,7 +156,7 @@ The controller Deployment sets `PRIME_API_URL=http://prime-api:8080`. Pod DNS fo
 | `make prereqs` | Download kind + kubectl to `/usr/local/bin` |
 | `make build` | Build both container images; override with `CONTAINER_ENGINE=podman` |
 | `make setup` | Create demo-net, start external API, create kind cluster, connect network |
-| `make load` | Load controller image into kind; `CONTAINER_ENGINE=podman` automatically switches Kind to Podman |
+| `make load` | Load controller image into kind; the Podman path uses an image archive instead of direct local-image lookup |
 | `make deploy` | Apply all manifests; wait for CRD + controller rollout |
 | `make demo` | Run `./demo.sh` |
 | `make logs` | Tail controller logs |

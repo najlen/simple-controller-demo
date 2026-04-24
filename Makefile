@@ -7,6 +7,7 @@ KUBECTL_BIN     := /usr/local/bin/kubectl
 CLUSTER_NAME    := demo-cluster
 NETWORK_NAME    := demo-net
 API_CONTAINER   := prime-api
+CONTROLLER_IMAGE := prime-controller:latest
 CONTAINER_ENGINE ?= docker
 KIND_PROVIDER    ?=
 
@@ -93,7 +94,14 @@ setup:
 # ──────────────────────────────────────────────────────────────────────────────
 load:
 	@echo "==> Loading prime-controller image into kind..."
-	$(KIND_PROVIDER_ENV) kind load docker-image prime-controller:latest --name $(CLUSTER_NAME)
+ifeq ($(KIND_PROVIDER),podman)
+	@TMP_ARCHIVE=$$(mktemp /tmp/prime-controller-image.XXXXXX.tar); \
+	  trap 'rm -f "$$TMP_ARCHIVE"' EXIT; \
+	  $(CONTAINER_ENGINE) save --format docker-archive -o "$$TMP_ARCHIVE" $(CONTROLLER_IMAGE); \
+	  $(KIND_PROVIDER_ENV) kind load image-archive "$$TMP_ARCHIVE" --name $(CLUSTER_NAME)
+else
+	$(KIND_PROVIDER_ENV) kind load docker-image $(CONTROLLER_IMAGE) --name $(CLUSTER_NAME)
+endif
 
 # ──────────────────────────────────────────────────────────────────────────────
 # deploy: apply manifests and wait for rollout
