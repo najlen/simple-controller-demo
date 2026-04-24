@@ -57,7 +57,7 @@ You can still override Kind directly with `KIND_PROVIDER=podman` if needed. If y
 - https://kind.sigs.k8s.io/docs/user/quick-start/
 - https://kind.sigs.k8s.io/docs/user/rootless/
 
-For image loading, the Podman path uses `podman save` plus `kind load image-archive`. Kind documents `image-archive` as a supported load mechanism, and Podman documents `save` producing a `docker-archive`, which avoids local image lookup issues with the experimental Podman provider.
+For image loading, the controller image is tagged as `localhost/prime-controller:latest`. The Podman path uses `podman save` plus `kind load image-archive`. Kind documents `image-archive` as a supported load mechanism, and Podman documents `save` producing a `docker-archive`, which avoids local image lookup issues with the experimental Podman provider.
 
 ---
 

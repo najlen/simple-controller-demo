@@ -7,7 +7,7 @@ KUBECTL_BIN     := /usr/local/bin/kubectl
 CLUSTER_NAME    := demo-cluster
 NETWORK_NAME    := demo-net
 API_CONTAINER   := prime-api
-CONTROLLER_IMAGE := prime-controller:latest
+CONTROLLER_IMAGE := localhost/prime-controller:latest
 CONTAINER_ENGINE ?= docker
 KIND_PROVIDER    ?=
 
@@ -50,7 +50,7 @@ build:
 	@echo "==> Building prime-api image with $(CONTAINER_ENGINE)..."
 	$(CONTAINER_ENGINE) build -t prime-api:latest ./external-api
 	@echo "==> Building prime-controller image with $(CONTAINER_ENGINE)..."
-	$(CONTAINER_ENGINE) build -t prime-controller:latest ./controller
+	$(CONTAINER_ENGINE) build -t prime-controller:latest -t $(CONTROLLER_IMAGE) ./controller
 
 # ──────────────────────────────────────────────────────────────────────────────
 # setup: create network, start external API, create kind cluster, connect net
